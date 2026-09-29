@@ -1,0 +1,14 @@
+-- Finding the top 3 customers by number of orders on each store city. Give customers with equal order counts the same rank and include all ties.
+
+ with customer_orders as (
+    select s.city, c.customer_id, concat(c.first_name,' ',c.last_name) customer_full_name,count(o.order_id)total_orders_placed
+    from orders o join customers c on o.customer_id =  c.customer_id
+    join stores s on s.store_id = o.store_id
+    group by 1,2,3
+ ),
+ ranked_customers as (
+    select *, rank() over(partition by city order by total_orders_placed desc) as c_rank from customer_orders
+ )
+ select city, customer_full_name, total_orders_placed from ranked_customers
+ where c_rank <= 3
+ order by city, customer_full_name, total_orders_placed desc
