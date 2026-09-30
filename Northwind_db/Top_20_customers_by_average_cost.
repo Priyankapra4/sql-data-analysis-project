@@ -1,0 +1,12 @@
+-- Calculate average cost (unit_price * quantity) for each customer.
+-- Rank customers by average cost in descending order and show 20 rows.
+
+with customer_orders as (
+    select o.customer_id, avg(od.unit_price * od.quantity) as avg_total_cost from orders o 
+    join order_details od on od.order_id = o.order_id 
+    group by 1
+ )
+ select customer_id, avg_total_cost, rank()over(order by avg_total_cost desc) as total_cost_rank
+ from customer_orders
+ order by avg_total_cost desc
+ limit 20
