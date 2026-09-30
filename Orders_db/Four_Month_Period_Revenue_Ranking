@@ -1,0 +1,40 @@
+-- Project: Orders Database Analysis
+-- File: 03_Four_Month_Period_Revenue_Ranking.sql
+-- Purpose:
+-- Calculate total revenue for each four-month period,
+-- rank the periods by revenue, and display them chronologically.
+
+-- STEP 1: Calculate total revenue for each four-month period.
+--
+-- Revenue = Quantity × List Price × (1 - Discount)
+--
+-- 1st Period  = January to April
+-- 2nd Period = May to August
+-- 3rd Period = September to December
+
+with period_r as (
+    select 
+        case
+            when extract(month from o.order_date) between 1 and 4 then '1st Period'
+            when extract(month from o.order_date) between 5 and 8 then '2nd Period'
+            else '3rd Period'
+        end as Period,
+    sum(oi.quantity *oi.list_price *(1-oi.discount)) as periodly_revenue
+    from orders o join order_items oi  on o.order_id = oi.order_id 
+    group by 1        
+),
+-- STEP 2: Rank the periods according to their total revenue.
+-- Highest revenue receives Rank 1.
+ranked as(
+    select Period,periodly_revenue, rank() over(order by periodly_revenue desc) as periodly_rank
+    from period_r
+)
+-- STEP 3: Return the final result.
+-- Display periods in chronological order.
+select Period, periodly_revenue,periodly_rank from ranked 
+order by 
+    case
+        when Period = '1st Period' then 1
+        when Period = '2nd Period' then 2
+        else 3
+    end;
