@@ -1,0 +1,5 @@
+-- List all employees and their Latest Order Date including who have not processed any orders.
+ select e.employee_id, e.first_name, e.last_name, max(o.order_date) as latest_order_date from employees e 
+ left join orders o on o.employee_id = e.employee_id
+ group by 1,2,3
+ order by 4 desc 
