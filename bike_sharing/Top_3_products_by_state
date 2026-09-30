@@ -1,0 +1,15 @@
+--Display top 3 most profitable productsfor each state showing their total revenue
+
+with product_rrevenue as (
+    select s.state, p.product_id, p.product_name, sum(oi.quantity * oi.list_price *(1-oi.discount)) as total_revenue
+    from orders o join stores s on s.store_id = o.store_id 
+    join order_items oi on oi.order_id = o.order_id
+    join products p on p.product_id = oi.product_id
+    group by 1,2,3
+ ),
+ ranked_products as (
+    select *, row_number() over(partition by state order by total_revenue desc, product_id asc) as rank 
+    from product_rrevenue)
+ select state, product_name, total_revenue, rank from ranked_products
+ where rank <=3
+ order by total_revenue desc
