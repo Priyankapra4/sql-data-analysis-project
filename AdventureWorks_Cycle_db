@@ -1,0 +1,28 @@
+-- Calculate average sales volume for each product (First Half vs Second Half)
+-- Rank products based on change in sales volume using DENSE_RANK()
+
+WITH FirstHalf AS (
+    SELECT 
+        product_id, 
+        AVG(orderquantity) AS avg_quantity_first_half
+    FROM SALES
+    WHERE EXTRACT(MONTH FROM orderdate) BETWEEN 1 AND 6
+    GROUP BY product_id
+),
+SecondHalf AS (
+    SELECT 
+        product_id, 
+        AVG(orderquantity) AS avg_quantity_second_half
+    FROM SALES
+    WHERE EXTRACT(MONTH FROM orderdate) BETWEEN 7 AND 12
+    GROUP BY product_id
+)
+SELECT 
+    F.product_id, 
+    ROUND(F.avg_quantity_first_half, 2) AS avg_quantity_first_half, 
+    ROUND(S.avg_quantity_second_half, 2) AS avg_quantity_second_half,
+    ROUND(S.avg_quantity_second_half - F.avg_quantity_first_half, 2) AS difference_in_both_half,
+    DENSE_RANK() OVER(ORDER BY ROUND(S.avg_quantity_second_half - F.avg_quantity_first_half, 2) DESC) AS rank_change
+FROM FirstHalf F
+JOIN SecondHalf S ON F.product_id = S.product_id
+ORDER BY 4 DESC, F.product_id;
