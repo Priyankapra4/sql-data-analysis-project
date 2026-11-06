@@ -1,5 +1,6 @@
+-- Average Sales Volume & Change Ranking (First vs Second Half)
 -- Calculate average sales volume for each product (First Half vs Second Half)
--- Rank products based on change in sales volume using DENSE_RANK()
+-- Rank products based on change in sales volume (no gaps on ties).
 
 with firsthalf as (
     select product_id, avg(orderquantity) as avg_quantity_first_half
